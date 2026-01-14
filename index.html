@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Check-list SPG Packing</title>
+    <title>Relatório de Conformidade SPG Packing</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#059669">
     <link rel="manifest" href="manifest.json">
+    <!-- Ícone Apple -->
     <link rel="apple-touch-icon" href="https://i.imgur.com/LVOeVk9.png">
     
     <!-- Tailwind CSS -->
@@ -25,6 +26,7 @@
             overscroll-behavior-y: none;
         }
         
+        /* Estilização dos checkboxes (Emerald 600) */
         .custom-checkbox:checked {
             background-color: #059669;
             border-color: #059669;
@@ -34,6 +36,7 @@
             font-weight: 600;
         }
 
+        /* Estilização do interruptor (toggle) */
         .toggle-checkbox:checked {
             right: 0;
             border-color: #059669;
@@ -58,6 +61,7 @@
             animation: slideIn 0.3s ease-out forwards;
         }
         
+        /* Classe para secções desativadas visualmente */
         .section-disabled {
             opacity: 0.5;
             pointer-events: none;
@@ -68,7 +72,7 @@
         #pdf-grid-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 15px;
             align-content: start;
         }
         
@@ -120,6 +124,7 @@
 
     <div id="appElement" class="pb-28">
         
+        <!-- Cabeçalho da Aplicação -->
         <header class="fixed top-0 w-full bg-emerald-600 text-white shadow-lg z-50">
             <div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -385,7 +390,7 @@
             }
         }
 
-        // --- LÓGICA DO RESPONSÁVEL ---
+        // --- LÓGICA DO RESPONSÁVEL (Apoia ambos os campos) ---
         function handleResponsibleChange(value, targetInputId) {
             const otherInput = document.getElementById(targetInputId);
             if (value === 'OUTRO') {
@@ -452,6 +457,10 @@
             const macActive = document.getElementById('toggle_machines').checked;
             const envActive = document.getElementById('toggle_environment').checked;
 
+            const empForm = new FormData(document.getElementById('form-employees'));
+            const macForm = new FormData(document.getElementById('form-machines'));
+            const envForm = new FormData(document.getElementById('form-environment'));
+
             const getCheck = (formId, fieldName, active) => {
                 if (!active) return false;
                 const form = document.getElementById(formId);
@@ -488,7 +497,6 @@
             return { date, responsible, packingResponsible, checks, observations, sections: { empActive, macActive, envActive } };
         }
 
-        // --- CORREÇÃO: ADICIONADAS AS OBSERVAÇÕES NA EXPORTAÇÃO CSV ---
         function exportCSV() {
             const data = getFormData();
             if(!data.date) { alert('Selecione a data!'); return; }
