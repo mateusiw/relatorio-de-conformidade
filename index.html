@@ -8,10 +8,7 @@
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#059669">
     <link rel="manifest" href="manifest.json">
-    
-    <!-- Ícones PWA (Apple e Padrão) -->
     <link rel="apple-touch-icon" href="https://i.imgur.com/LVOeVk9.png">
-    <link rel="icon" type="image/png" href="https://i.imgur.com/LVOeVk9.png">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,7 +25,6 @@
             overscroll-behavior-y: none;
         }
         
-        /* Estilização dos checkboxes (Emerald 600) */
         .custom-checkbox:checked {
             background-color: #059669;
             border-color: #059669;
@@ -38,7 +34,6 @@
             font-weight: 600;
         }
 
-        /* Estilização do interruptor (toggle) */
         .toggle-checkbox:checked {
             right: 0;
             border-color: #059669;
@@ -63,18 +58,17 @@
             animation: slideIn 0.3s ease-out forwards;
         }
         
-        /* Classe para secções desativadas visualmente */
         .section-disabled {
             opacity: 0.5;
             pointer-events: none;
             filter: grayscale(100%);
         }
 
-        /* --- ESTILOS EXCLUSIVOS DO PDF --- */
+        /* --- ESTILOS DO PDF --- */
         #pdf-grid-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: 12px;
             align-content: start;
         }
         
@@ -101,14 +95,11 @@
         }
 
         .pdf-card-body {
-            padding: 8px;
+            padding: 6px;
             font-size: 9px;
         }
 
         .pdf-item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border-bottom: 1px dashed #ccc;
             padding-bottom: 2px;
             margin-bottom: 2px;
@@ -126,7 +117,6 @@
 
     <div id="appElement" class="pb-28">
         
-        <!-- Cabeçalho da Aplicação -->
         <header class="fixed top-0 w-full bg-emerald-600 text-white shadow-lg z-50">
             <div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -140,7 +130,7 @@
 
         <main class="max-w-3xl mx-auto px-4 pt-20 space-y-6">
 
-            <!-- Info do Check-list -->
+            <!-- Dados da Inspeção -->
             <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 animate-slide">
                 <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Dados da Inspeção</h2>
                 <div class="space-y-5">
@@ -149,7 +139,6 @@
                         <input type="date" id="dateInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
                     </div>
                     
-                    <!-- Responsável pela Inspeção -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Responsável pela Inspeção</label>
                         <select id="responsibleInput" onchange="handleResponsibleChange(this.value, 'otherResponsibleInput')" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all appearance-none cursor-pointer">
@@ -159,7 +148,6 @@
                         <input type="text" id="otherResponsibleInput" placeholder="Escreva o nome do inspetor" class="hidden mt-3 w-full bg-white border-2 border-emerald-500 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-600 outline-none animate-slide shadow-sm">
                     </div>
 
-                    <!-- Responsável do Packing -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Responsável do Packing</label>
                         <select id="packingResponsibleInput" onchange="handleResponsibleChange(this.value, 'otherPackingResponsibleInput')" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all appearance-none cursor-pointer">
@@ -171,94 +159,110 @@
                 </div>
             </section>
 
-            <!-- Legenda explicativa -->
+            <!-- Legenda -->
             <section class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 animate-slide flex items-start gap-3">
                 <div class="bg-emerald-200 p-1.5 rounded-lg">
                     <i data-lucide="info" class="w-4 h-4 text-emerald-700"></i>
                 </div>
                 <div class="text-xs text-emerald-900 leading-relaxed">
-                    <p class="font-bold mb-1">Instrução de Preenchimento:</p>
-                    <p>Ao <span class="font-bold">marcar</span> o quadrado, indica que o item está <span class="font-bold underline">Conforme</span>. Se deixar <span class="font-bold">vazio</span>, será considerado <span class="font-bold underline text-red-700">Não Conforme</span>.</p>
+                    <p class="font-bold mb-1">Instrução:</p>
+                    <p>Ao <span class="font-bold">marcar</span> o quadrado = <span class="font-bold underline">Conforme</span>. <br> <span class="font-bold">Desmarcado</span> = <span class="font-bold underline text-red-700">Não Conforme</span>.</p>
                 </div>
             </section>
 
             <!-- Abas -->
             <div class="flex p-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto scrollbar-hide">
-                <button onclick="switchTab('employees')" id="tab-employees" class="flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all bg-emerald-100 text-emerald-800 whitespace-nowrap px-4">
-                    Colaboradores
-                </button>
-                <button onclick="switchTab('machines')" id="tab-machines" class="flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all text-slate-500 hover:bg-slate-50 whitespace-nowrap px-4">
-                    Máquinas
-                </button>
-                <button onclick="switchTab('environment')" id="tab-environment" class="flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all text-slate-500 hover:bg-slate-50 whitespace-nowrap px-4">
-                    Ambiente
-                </button>
+                <button onclick="switchTab('employees')" id="tab-employees" class="flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all bg-emerald-100 text-emerald-800 whitespace-nowrap px-4">Colaboradores</button>
+                <button onclick="switchTab('machines')" id="tab-machines" class="flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all text-slate-500 hover:bg-slate-50 whitespace-nowrap px-4">Máquinas</button>
+                <button onclick="switchTab('environment')" id="tab-environment" class="flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all text-slate-500 hover:bg-slate-50 whitespace-nowrap px-4">Ambiente</button>
             </div>
 
             <!-- ABA 1: Colaboradores -->
             <form id="form-employees" class="space-y-4 animate-slide">
                 <div class="bg-emerald-600/5 p-4 rounded-2xl border border-emerald-600/10 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-emerald-600"></div>
-                        <span class="text-sm font-bold text-emerald-900">Avaliar Colaboradores?</span>
-                    </div>
+                    <span class="text-sm font-bold text-emerald-900">Avaliar Colaboradores?</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggle_employees" onchange="toggleSection('employees')" class="sr-only peer">
                         <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                     </label>
                 </div>
                 <div id="content_employees" class="space-y-4 transition-opacity duration-200 section-disabled">
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
-                            <i data-lucide="user" class="w-4 h-4 text-emerald-600"></i>
-                            <h3 class="font-bold text-sm text-slate-700">Higiene Pessoal</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden p-4 space-y-4">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b pb-2">Higiene Pessoal</h3>
+                        
+                        <!-- Item com Observação -->
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="unhas" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Unhas curtas, limpas, sem verniz/base.</div>
+                            </label>
+                            <input type="text" name="obs_unhas" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
                         </div>
-                        <div class="p-4 space-y-4">
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="unhas" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Unhas curtas, limpas, sem verniz e sem base.</div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="barba" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Barba e Bigode feitos.</div>
                             </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="barba" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Barba e Bigode feitos (aparência limpa).</div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="cabelos" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Cabelos aparados / contidos na touca.</div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="adornos" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Ausência de adornos (anéis, brincos, etc).</div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="perfume" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Sem uso excessivo de perfume ou maquilhagem.</div>
-                            </label>
+                            <input type="text" name="obs_barba" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
                         </div>
-                    </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
-                            <i data-lucide="shield" class="w-4 h-4 text-emerald-600"></i>
-                            <h3 class="font-bold text-sm text-slate-700">Uniforme e EPIs</h3>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="cabelos" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Cabelos aparados / contidos na touca.</div>
+                            </label>
+                            <input type="text" name="obs_cabelos" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
                         </div>
-                        <div class="p-4 space-y-4">
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="uniforme" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Uniforme completo e limpo.</div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="adornos" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Ausência de adornos (anéis, brincos).</div>
                             </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="botas" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Botas higienizadas e limpas.</div>
+                            <input type="text" name="obs_adornos" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="perfume" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Sem uso excessivo de perfume/maquilhagem.</div>
                             </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="epi" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">EPIs corretos (Cintas lombares e Luvas).</div>
-                            </label>
+                            <input type="text" name="obs_perfume" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
                         </div>
                     </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden p-4 space-y-4">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b pb-2">Uniforme e EPIs</h3>
+                        
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="uniforme" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Uniforme completo e limpo.</div>
+                            </label>
+                            <input type="text" name="obs_uniforme" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="botas" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Botas higienizadas e limpas.</div>
+                            </label>
+                            <input type="text" name="obs_botas" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="epi" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">EPIs corretos (Cintas e Luvas).</div>
+                            </label>
+                            <input type="text" name="obs_epi" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
+                        </div>
+                    </div>
+                    
                     <div>
                         <label class="block text-xs font-bold text-emerald-900 mb-2 pl-1">Observações Gerais (Colaboradores)</label>
-                        <textarea id="empObs" rows="2" disabled class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none placeholder:text-slate-300" placeholder="Relate anomalias..."></textarea>
+                        <textarea id="empObs" rows="2" disabled class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none placeholder:text-slate-300" placeholder="Relate anomalias gerais..."></textarea>
                     </div>
                 </div>
             </form>
@@ -266,39 +270,43 @@
             <!-- ABA 2: Máquinas -->
             <form id="form-machines" class="space-y-4 hidden animate-slide">
                 <div class="bg-emerald-600/5 p-4 rounded-2xl border border-emerald-600/10 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-emerald-600"></div>
-                        <span class="text-sm font-bold text-emerald-900">Avaliar Máquinas?</span>
-                    </div>
+                    <span class="text-sm font-bold text-emerald-900">Avaliar Máquinas?</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggle_machines" onchange="toggleSection('machines')" class="sr-only peer">
                         <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                     </label>
                 </div>
                 <div id="content_machines" class="space-y-4 transition-opacity duration-200 section-disabled">
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
-                            <i data-lucide="settings" class="w-4 h-4 text-emerald-600"></i>
-                            <h3 class="font-bold text-sm text-slate-700">Operacional e Manutenção</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden p-4 space-y-4">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b pb-2">Condições Operacionais</h3>
+                        
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="mq_limpeza" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Superfícies limpas e sanitizadas.</div>
+                            </label>
+                            <input type="text" name="obs_mq_limpeza" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
                         </div>
-                        <div class="p-4 space-y-4">
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="mq_limpeza" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Superfícies limpas e sanitizadas.</div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="mq_vazamento" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Ausência de fugas de óleo/lubrificantes.</div>
                             </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="mq_vazamento" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Ausência de fugas de óleo/lubrificantes.</div>
+                            <input type="text" name="obs_mq_vazamento" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="mq_calibracao" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Manutenção Preventiva e Calibração.</div>
                             </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="mq_calibracao" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Manutenção Preventiva e Calibração em dia.</div>
-                            </label>
+                            <input type="text" name="obs_mq_calibracao" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
                         </div>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-emerald-900 mb-2 pl-1">Observações Gerais (Máquinas)</label>
-                        <textarea id="machineObs" rows="2" disabled class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Relate anomalias..."></textarea>
+                        <textarea id="machineObs" rows="2" disabled class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Relate anomalias gerais..."></textarea>
                     </div>
                 </div>
             </form>
@@ -306,59 +314,51 @@
             <!-- ABA 3: Ambiente -->
             <form id="form-environment" class="space-y-4 hidden animate-slide">
                 <div class="bg-emerald-600/5 p-4 rounded-2xl border border-emerald-600/10 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-emerald-600"></div>
-                        <span class="text-sm font-bold text-emerald-900">Avaliar Ambiente?</span>
-                    </div>
+                    <span class="text-sm font-bold text-emerald-900">Avaliar Ambiente?</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggle_environment" onchange="toggleSection('environment')" class="sr-only peer">
                         <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                     </label>
                 </div>
                 <div id="content_environment" class="space-y-4 transition-opacity duration-200 section-disabled">
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
-                            <i data-lucide="building" class="w-4 h-4 text-emerald-600"></i>
-                            <h3 class="font-bold text-sm text-slate-700">Higiene e Resíduos</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden p-4 space-y-4">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b pb-2">Higiene e Controlo</h3>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="inst_higiene" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Higiene Instalações (Pisos, Paredes).</div>
+                            </label>
+                            <input type="text" name="obs_inst_higiene" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
                         </div>
-                        <div class="p-4 space-y-4">
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="inst_higiene" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Higiene das Instalações (Pisos, Paredes, Tetos).</div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="inst_residuos" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Manejo dos Resíduos.</div>
                             </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="inst_residuos" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Manejo dos Resíduos (Lixeiras e Coleta).</div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="inst_pragas" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Controle Integrado de Pragas.</div>
-                            </label>
+                            <input type="text" name="obs_inst_residuos" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
                         </div>
-                    </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
-                            <i data-lucide="droplet" class="w-4 h-4 text-emerald-600"></i>
-                            <h3 class="font-bold text-sm text-slate-700">Água e Matérias-Primas</h3>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="inst_pragas" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Controle Integrado de Pragas.</div>
+                            </label>
+                            <input type="text" name="obs_inst_pragas" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
                         </div>
-                        <div class="p-4 space-y-4">
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="inst_agua" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Potabilidade da Água.</div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <label class="flex items-start gap-3 cursor-pointer group mb-2">
+                                <input type="checkbox" name="inst_agua" disabled class="custom-checkbox mt-0.5 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-700 font-medium">Potabilidade da Água.</div>
                             </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="inst_materiaprima" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Seleção das Matérias-Primas.</div>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" name="inst_ilum" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
-                                <div class="text-sm text-slate-600">Iluminação adequada e protegida.</div>
-                            </label>
+                            <input type="text" name="obs_inst_agua" disabled placeholder="Observação (opcional)" class="w-full text-xs bg-white border border-slate-200 rounded-md p-2 focus:ring-1 focus:ring-emerald-500 outline-none">
                         </div>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-emerald-900 mb-2 pl-1">Observações Gerais (Ambiente)</label>
-                        <textarea id="envObs" rows="2" disabled class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Relate anomalias..."></textarea>
+                        <textarea id="envObs" rows="2" disabled class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Relate anomalias gerais..."></textarea>
                     </div>
                 </div>
             </form>
@@ -392,7 +392,7 @@
             }
         }
 
-        // --- LÓGICA DO RESPONSÁVEL (Apoia ambos os campos) ---
+        // Lógica dos Responsáveis
         function handleResponsibleChange(value, targetInputId) {
             const otherInput = document.getElementById(targetInputId);
             if (value === 'OUTRO') {
@@ -408,10 +408,10 @@
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
             var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-            var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
-            return weekNo;
+            return Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
         }
 
+        // Troca de Abas
         function switchTab(tab) {
             const btnEmp = document.getElementById('tab-employees');
             const btnMac = document.getElementById('tab-machines');
@@ -442,15 +442,14 @@
             inputs.forEach(el => el.disabled = !isActive);
         }
 
+        // Recolha de dados com observações individuais
         function getFormData() {
             const date = document.getElementById('dateInput').value;
             
-            // Responsável Inspeção
             const respSelect = document.getElementById('responsibleInput').value;
             const respOther = document.getElementById('otherResponsibleInput').value;
             const responsible = (respSelect === 'OUTRO') ? (respOther || 'Não Especificado') : respSelect;
             
-            // Responsável Packing
             const packSelect = document.getElementById('packingResponsibleInput').value;
             const packOther = document.getElementById('otherPackingResponsibleInput').value;
             const packingResponsible = (packSelect === 'OUTRO') ? (packOther || 'Não Especificado') : packSelect;
@@ -459,35 +458,40 @@
             const macActive = document.getElementById('toggle_machines').checked;
             const envActive = document.getElementById('toggle_environment').checked;
 
-            const empForm = new FormData(document.getElementById('form-employees'));
-            const macForm = new FormData(document.getElementById('form-machines'));
-            const envForm = new FormData(document.getElementById('form-environment'));
-
-            const getCheck = (formId, fieldName, active) => {
-                if (!active) return false;
+            // Função auxiliar para capturar check + observação
+            const getCheckData = (formId, fieldName, active) => {
+                if (!active) return { checked: false, obs: '' };
                 const form = document.getElementById(formId);
-                const input = form.querySelector(`input[name="${fieldName}"]`);
-                return input ? input.checked : false;
+                const check = form.querySelector(`input[name="${fieldName}"]`).checked;
+                const obsInput = form.querySelector(`input[name="obs_${fieldName}"]`);
+                const obs = obsInput ? obsInput.value : '';
+                return { checked: check, obs: obs };
             };
 
+            // Mapeamento dos campos
             const checks = {
-                'Unhas Curtas/Limpas': getCheck('form-employees', 'unhas', empActive),
-                'Barba/Bigode Feitos': getCheck('form-employees', 'barba', empActive),
-                'Cabelos Aparados/Touca': getCheck('form-employees', 'cabelos', empActive),
-                'Ausência de Adornos': getCheck('form-employees', 'adornos', empActive),
-                'Sem Perfume/Maquilhagem': getCheck('form-employees', 'perfume', empActive),
-                'Uniforme Completo': getCheck('form-employees', 'uniforme', empActive),
-                'Botas Limpas': getCheck('form-employees', 'botas', empActive),
-                'EPIs Corretos': getCheck('form-employees', 'epi', empActive),
-                'Máq. Limpeza': getCheck('form-machines', 'mq_limpeza', macActive),
-                'Máq. Vazamento': getCheck('form-machines', 'mq_vazamento', macActive),
-                'Manut. Calibração': getCheck('form-machines', 'mq_calibracao', macActive),
-                'Higiene Instalações': getCheck('form-environment', 'inst_higiene', envActive),
-                'Manejo Resíduos': getCheck('form-environment', 'inst_residuos', envActive),
-                'Controle Pragas': getCheck('form-environment', 'inst_pragas', envActive),
-                'Potabilidade Água': getCheck('form-environment', 'inst_agua', envActive),
-                'Seleção Matéria-Prima': getCheck('form-environment', 'inst_materiaprima', envActive),
-                'Iluminação Ambiente': getCheck('form-environment', 'inst_ilum', envActive)
+                // Colaboradores
+                'Unhas Curtas/Limpas': getCheckData('form-employees', 'unhas', empActive),
+                'Barba/Bigode Feitos': getCheckData('form-employees', 'barba', empActive),
+                'Cabelos Aparados/Touca': getCheckData('form-employees', 'cabelos', empActive),
+                'Ausência de Adornos': getCheckData('form-employees', 'adornos', empActive),
+                'Sem Perfume/Maquilhagem': getCheckData('form-employees', 'perfume', empActive),
+                'Uniforme Completo': getCheckData('form-employees', 'uniforme', empActive),
+                'Botas Limpas': getCheckData('form-employees', 'botas', empActive),
+                'EPIs Corretos': getCheckData('form-employees', 'epi', empActive),
+                
+                // Máquinas
+                'Máq. Limpeza': getCheckData('form-machines', 'mq_limpeza', macActive),
+                'Máq. Vazamento': getCheckData('form-machines', 'mq_vazamento', macActive),
+                'Manut. Calibração': getCheckData('form-machines', 'mq_calibracao', macActive),
+                
+                // Ambiente
+                'Higiene Instalações': getCheckData('form-environment', 'inst_higiene', envActive),
+                'Manejo Resíduos': getCheckData('form-environment', 'inst_residuos', envActive),
+                'Controle Pragas': getCheckData('form-environment', 'inst_pragas', envActive),
+                'Potabilidade Água': getCheckData('form-environment', 'inst_agua', envActive),
+                'Seleção Matéria-Prima': getCheckData('form-environment', 'inst_materiaprima', envActive),
+                'Iluminação Ambiente': getCheckData('form-environment', 'inst_ilum', envActive)
             };
 
             const observations = {
@@ -499,26 +503,25 @@
             return { date, responsible, packingResponsible, checks, observations, sections: { empActive, macActive, envActive } };
         }
 
+        // Exportação CSV atualizada
         function exportCSV() {
             const data = getFormData();
             if(!data.date) { alert('Selecione a data!'); return; }
             
-            let csvContent = "\uFEFFData;Resp. Inspeção;Resp. Packing;Item;Status;Detalhes\n"; 
+            let csvContent = "\uFEFFData;Resp. Inspeção;Resp. Packing;Item;Status;Observação Item;Observações Gerais\n"; 
             
-            // Adiciona itens de verificação
             for (const [key, val] of Object.entries(data.checks)) {
-                csvContent += `${data.date};${data.responsible};${data.packingResponsible};${key};${val ? 'CONFORME' : 'NÃO CONFORME'};\n`; 
-            }
-            
-            // Adiciona observações como linhas informativas
-            if (data.observations.emp) {
-                csvContent += `${data.date};${data.responsible};${data.packingResponsible};Obs. Colaboradores;INFO;${data.observations.emp.replace(/[\n\r]+/g, ' ')}\n`;
-            }
-            if (data.observations.mac) {
-                csvContent += `${data.date};${data.responsible};${data.packingResponsible};Obs. Máquinas;INFO;${data.observations.mac.replace(/[\n\r]+/g, ' ')}\n`;
-            }
-            if (data.observations.env) {
-                csvContent += `${data.date};${data.responsible};${data.packingResponsible};Obs. Ambiente;INFO;${data.observations.env.replace(/[\n\r]+/g, ' ')}\n`;
+                // Determina qual obs geral pertence a este item (simplificado)
+                let groupObs = '';
+                if(Object.keys(data.checks).indexOf(key) < 8) groupObs = data.observations.emp;
+                else if(Object.keys(data.checks).indexOf(key) < 11) groupObs = data.observations.mac;
+                else groupObs = data.observations.env;
+
+                // Limpeza de texto
+                const cleanObs = val.obs ? val.obs.replace(/[\n\r;]/g, ' ') : '';
+                const cleanGroupObs = groupObs ? groupObs.replace(/[\n\r;]/g, ' ') : '';
+                
+                csvContent += `${data.date};${data.responsible};${data.packingResponsible};${key};${val.checked ? 'CONFORME' : 'NÃO CONFORME'};${cleanObs};${cleanGroupObs}\n`; 
             }
             
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -530,7 +533,7 @@
 
         async function generatePDF() {
             const data = getFormData();
-            if(data.responsible === 'Não Especificado' || data.packingResponsible === 'Não Especificado' || data.packingResponsible === 'SELECIONAR RESPONSÁVEL') {
+            if(data.responsible === 'Não Especificado' || data.packingResponsible === 'Não Especificado') {
                 alert("Por favor, preencha corretamente os nomes dos responsáveis.");
                 return;
             }
@@ -549,48 +552,68 @@
 
             const pdfContainer = document.getElementById('pdf-report-grid');
 
-            const generateItemHtml = (label, isChecked) => {
+            // Gerador de linha com observação
+            const generateItemHtml = (label, itemData) => {
+                const isChecked = itemData.checked;
+                const obsText = itemData.obs;
+                
                 const statusText = isChecked ? 'OK' : 'NC';
                 const statusClass = isChecked ? 'status-ok' : 'status-nc';
-                return `<div class="pdf-item-row"><span style="flex:1;">${label}</span><div style="display:flex; align-items:center;"><span style="margin-left:5px; font-size:9px;" class="${statusClass}">${statusText}</span></div></div>`;
+                
+                // Se houver observação, mostra em uma linha abaixo com fonte menor
+                const obsHtml = obsText ? `<div style="font-size:8px; color:#555; margin-left:10px; margin-top:2px;">Obs: ${obsText}</div>` : '';
+
+                return `
+                <div class="pdf-item-row" style="flex-direction:column; align-items:stretch;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="flex:1;">${label}</span>
+                        <span style="margin-left:5px; font-size:9px;" class="${statusClass}">${statusText}</span>
+                    </div>
+                    ${obsHtml}
+                </div>`;
             };
 
             let blocksHtml = '';
 
+            // 1. Colaboradores
             if (data.sections.empActive) {
                 let itemsHtml = '';
-                ['Unhas Curtas/Limpas', 'Barba/Bigode Feitos', 'Cabelos Aparados/Touca', 'Ausência de Adornos', 'Sem Perfume/Maquilhagem', 'Uniforme Completo', 'Botas Limpas', 'EPIs Corretos'].forEach(k => itemsHtml += generateItemHtml(k, data.checks[k]));
-                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Colaboradores & EPI</div><div class="pdf-card-body">${itemsHtml}</div></div>`;
+                const keys = ['Unhas Curtas/Limpas', 'Barba/Bigode Feitos', 'Cabelos Aparados/Touca', 'Ausência de Adornos', 'Sem Perfume/Maquilhagem', 'Uniforme Completo', 'Botas Limpas', 'EPIs Corretos'];
+                keys.forEach(k => itemsHtml += generateItemHtml(k, data.checks[k]));
+                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Higiene Pessoal & EPI</div><div class="pdf-card-body">${itemsHtml}</div></div>`;
             }
 
+            // 2. Máquinas
             if (data.sections.macActive) {
                 let itemsHtml = '';
-                ['Máq. Limpeza', 'Máq. Vazamento', 'Manut. Calibração'].forEach(k => itemsHtml += generateItemHtml(k, data.checks[k]));
-                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Máquinas</div><div class="pdf-card-body">${itemsHtml}</div></div>`;
+                const keys = ['Máq. Limpeza', 'Máq. Vazamento', 'Manut. Calibração'];
+                keys.forEach(k => itemsHtml += generateItemHtml(k, data.checks[k]));
+                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Máquinas & Manutenção</div><div class="pdf-card-body">${itemsHtml}</div></div>`;
             }
 
+            // 3. Ambiente
             if (data.sections.envActive) {
-                let itemsHigieneHtml = '';
-                ['Higiene Instalações', 'Manejo Resíduos', 'Controle Pragas'].forEach(k => itemsHigieneHtml += generateItemHtml(k, data.checks[k]));
-                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Ambiente: Higiene</div><div class="pdf-card-body">${itemsHigieneHtml}</div></div>`;
+                let itemsHtml1 = '';
+                ['Higiene Instalações', 'Manejo Resíduos', 'Controle Pragas'].forEach(k => itemsHtml1 += generateItemHtml(k, data.checks[k]));
+                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Ambiente: Higiene</div><div class="pdf-card-body">${itemsHtml1}</div></div>`;
 
-                let itemsProcessoHtml = '';
-                ['Potabilidade Água', 'Seleção Matéria-Prima', 'Iluminação Ambiente'].forEach(k => itemsProcessoHtml += generateItemHtml(k, data.checks[k]));
-                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Ambiente: Processos</div><div class="pdf-card-body">${itemsProcessoHtml}</div></div>`;
+                let itemsHtml2 = '';
+                ['Potabilidade Água', 'Seleção Matéria-Prima', 'Iluminação Ambiente'].forEach(k => itemsHtml2 += generateItemHtml(k, data.checks[k]));
+                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Ambiente: Processos</div><div class="pdf-card-body">${itemsHtml2}</div></div>`;
             }
 
+            // Observações Gerais
             let obsContent = '';
             if (data.observations.emp) obsContent += `<div><strong>Colab:</strong> ${data.observations.emp}</div>`;
             if (data.observations.mac) obsContent += `<div style="margin-top:4px;"><strong>Máq:</strong> ${data.observations.mac}</div>`;
             if (data.observations.env) obsContent += `<div style="margin-top:4px;"><strong>Amb:</strong> ${data.observations.env}</div>`;
-            if (!obsContent) obsContent = '<div style="font-style:italic; color:#999;">Sem observações registadas.</div>';
+            if (!obsContent) obsContent = '<div style="font-style:italic; color:#999;">Sem observações gerais.</div>';
 
             blocksHtml += `
                 <div class="pdf-card">
                     <div class="pdf-card-header">Observações e Assinaturas</div>
                     <div class="pdf-card-body">${obsContent}</div>
                     <div style="margin-top:auto; padding:12px; border-top:1px dashed #ccc; display:flex; gap:20px; justify-content:space-around;">
-                        
                         <div style="flex:1; text-align:center;">
                             <div style="height:20px;"></div>
                             <div style="border-top:1.5px solid #059669; padding-top:6px;">
@@ -598,7 +621,6 @@
                                 <div style="font-size:9px; font-weight:bold; color:#000;">${data.responsible}</div>
                             </div>
                         </div>
-
                         <div style="flex:1; text-align:center;">
                             <div style="height:20px;"></div>
                             <div style="border-top:1.5px solid #059669; padding-top:6px;">
@@ -606,7 +628,6 @@
                                 <div style="font-size:9px; font-weight:bold; color:#000;">${data.packingResponsible}</div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             `;
@@ -621,7 +642,6 @@
                         <div style="text-align: right;">
                             <div style="font-size: 16px; font-weight: bold;">${datePt}</div>
                             <div style="font-size: 12px; font-weight: bold; color: #333;">${timeStr} | ${weekStr}</div>
-                            <div style="font-size: 10px; color: #666; text-transform: uppercase;">Data / Hora / Período</div>
                         </div>
                         <img src="https://i.imgur.com/LVOeVk9.png" style="height: 60px;" crossorigin="anonymous">
                     </div>
