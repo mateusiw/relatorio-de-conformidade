@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Check-list SPG Packing</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#059669">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/LVOeVk9.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Bibliotecas de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+        }
+        
+        .custom-checkbox:checked {
+            background-color: #059669;
+            border-color: #059669;
+        }
+        .custom-checkbox:checked + div {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #059669;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #059669;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        .section-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(100%);
+        }
+
+        /* --- ESTILOS EXCLUSIVOS DO PDF --- */
+        #pdf-grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            align-content: start;
+        }
+        
+        .pdf-card {
+            background: #fff;
+            border: 1px solid #000;
+            border-radius: 4px;
+            padding: 0;
+            break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .pdf-card-header {
+            background-color: #f3f4f6;
+            border-bottom: 1px solid #000;
+            padding: 5px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 10px;
+            color: #111;
+        }
+
+        .pdf-card-body {
+            padding: 8px;
+            font-size: 9px;
+        }
+
+        .pdf-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 2px;
+            margin-bottom: 2px;
+        }
+        .pdf-item-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .status-ok { font-weight: bold; color: #059669; }
+        .status-nc { font-weight: bold; color: #991b1b; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+    <div id="appElement" class="pb-28">
+        
+        <header class="fixed top-0 w-full bg-emerald-600 text-white shadow-lg z-50">
+            <div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/20 p-2 rounded-lg">
+                        <i data-lucide="clipboard-check" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <h1 class="font-bold text-lg tracking-wide uppercase">Relatório de Conformidade</h1>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-3xl mx-auto px-4 pt-20 space-y-6">
+
+            <!-- Info do Check-list -->
+            <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 animate-slide">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Dados da Inspeção</h2>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Data da Inspeção</label>
+                        <input type="date" id="dateInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                    </div>
+                    
+                    <!-- Responsável pela Inspeção -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Responsável pela Inspeção</label>
+                        <select id="responsibleInput" onchange="handleResponsibleChange(this.value, 'otherResponsibleInput')" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all appearance-none cursor-pointer">
+                            <option value="JOÃO VICTOR GONÇALVES" selected>JOÃO VICTOR GONÇALVES</option>
+                            <option value="OUTRO">OUTRO RESPONSÁVEL</option>
+                        </select>
+                        <input type="text" id="otherResponsibleInput" placeholder="Escreva o nome do inspetor" class="hidden mt-3 w-full bg-white border-2 border-emerald-500 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-600 outline-none animate-slide shadow-sm">
+                    </div>
+
+                    <!-- Responsável do Packing -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Responsável do Packing</label>
+                        <select id="packingResponsibleInput" onchange="handleResponsibleChange(this.value, 'otherPackingResponsibleInput')" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all appearance-none cursor-pointer">
+                            <option value="FRANCISCO FAGNER ISAIAS" selected>FRANCISCO FAGNER ISAIAS</option>
+                            <option value="OUTRO">OUTRO (DIGITAR NOME)</option>
+                        </select>
+                        <input type="text" id="otherPackingResponsibleInput" placeholder="Escreva o nome do responsável do packing" class="hidden mt-3 w-full bg-white border-2 border-emerald-500 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-600 outline-none animate-slide shadow-sm">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Legenda explicativa -->
+            <section class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 animate-slide flex items-start gap-3">
+                <div class="bg-emerald-200 p-1.5 rounded-lg">
+                    <i data-lucide="info" class="w-4 h-4 text-emerald-700"></i>
+                </div>
+                <div class="text-xs text-emerald-900 leading-relaxed">
+                    <p class="font-bold mb-1">Instrução de Preenchimento:</p>
+                    <p>Ao <span class="font-bold">marcar</span> o quadrado, indica que o item está <span class="font-bold underline">Conforme</span>. Se deixar <span class="font-bold">vazio</span>, será considerado <span class="font-bold underline text-red-700">Não Conforme</span>.</p>
+                </div>
+            </section>
+
+            <!-- Abas -->
+            <div class="flex p-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto scrollbar-hide">
+                <button onclick="switchTab('employees')" id="tab-employees" class="flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all bg-emerald-100 text-emerald-800 whitespace-nowrap px-4">
+                    Colaboradores
+                </button>
+                <button onclick="switchTab('machines')" id="tab-machines" class="flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all text-slate-500 hover:bg-slate-50 whitespace-nowrap px-4">
+                    Máquinas
+                </button>
+                <button onclick="switchTab('environment')" id="tab-environment" class="flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all text-slate-500 hover:bg-slate-50 whitespace-nowrap px-4">
+                    Ambiente
+                </button>
+            </div>
+
+            <!-- ABA 1: Colaboradores -->
+            <form id="form-employees" class="space-y-4 animate-slide">
+                <div class="bg-emerald-600/5 p-4 rounded-2xl border border-emerald-600/10 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-600"></div>
+                        <span class="text-sm font-bold text-emerald-900">Avaliar Colaboradores?</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggle_employees" onchange="toggleSection('employees')" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                    </label>
+                </div>
+                <div id="content_employees" class="space-y-4 transition-opacity duration-200 section-disabled">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+                            <i data-lucide="user" class="w-4 h-4 text-emerald-600"></i>
+                            <h3 class="font-bold text-sm text-slate-700">Higiene Pessoal</h3>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="unhas" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Unhas curtas, limpas, sem verniz e sem base.</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="barba" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Barba e Bigode feitos (aparência limpa).</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="cabelos" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Cabelos aparados / contidos na touca.</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="adornos" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Ausência de adornos (anéis, brincos, etc).</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="perfume" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Sem uso excessivo de perfume ou maquilhagem.</div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+                            <i data-lucide="shield" class="w-4 h-4 text-emerald-600"></i>
+                            <h3 class="font-bold text-sm text-slate-700">Uniforme e EPIs</h3>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="uniforme" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Uniforme completo e limpo.</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="botas" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Botas higienizadas e limpas.</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="epi" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">EPIs corretos (Cintas lombares e Luvas).</div>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-emerald-900 mb-2 pl-1">Observações Gerais (Colaboradores)</label>
+                        <textarea id="empObs" rows="2" disabled class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none placeholder:text-slate-300" placeholder="Relate anomalias..."></textarea>
+                    </div>
+                </div>
+            </form>
+
+            <!-- ABA 2: Máquinas -->
+            <form id="form-machines" class="space-y-4 hidden animate-slide">
+                <div class="bg-emerald-600/5 p-4 rounded-2xl border border-emerald-600/10 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-600"></div>
+                        <span class="text-sm font-bold text-emerald-900">Avaliar Máquinas?</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggle_machines" onchange="toggleSection('machines')" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                    </label>
+                </div>
+                <div id="content_machines" class="space-y-4 transition-opacity duration-200 section-disabled">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+                            <i data-lucide="settings" class="w-4 h-4 text-emerald-600"></i>
+                            <h3 class="font-bold text-sm text-slate-700">Operacional e Manutenção</h3>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="mq_limpeza" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Superfícies limpas e sanitizadas.</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="mq_vazamento" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Ausência de fugas de óleo/lubrificantes.</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="mq_calibracao" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Manutenção Preventiva e Calibração em dia.</div>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-emerald-900 mb-2 pl-1">Observações Gerais (Máquinas)</label>
+                        <textarea id="machineObs" rows="2" disabled class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Relate anomalias..."></textarea>
+                    </div>
+                </div>
+            </form>
+
+            <!-- ABA 3: Ambiente -->
+            <form id="form-environment" class="space-y-4 hidden animate-slide">
+                <div class="bg-emerald-600/5 p-4 rounded-2xl border border-emerald-600/10 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-600"></div>
+                        <span class="text-sm font-bold text-emerald-900">Avaliar Ambiente?</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggle_environment" onchange="toggleSection('environment')" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                    </label>
+                </div>
+                <div id="content_environment" class="space-y-4 transition-opacity duration-200 section-disabled">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+                            <i data-lucide="building" class="w-4 h-4 text-emerald-600"></i>
+                            <h3 class="font-bold text-sm text-slate-700">Higiene e Resíduos</h3>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="inst_higiene" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Higiene das Instalações (Pisos, Paredes, Tetos).</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="inst_residuos" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Manejo dos Resíduos (Lixeiras e Coleta).</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="inst_pragas" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Controle Integrado de Pragas.</div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+                            <i data-lucide="droplet" class="w-4 h-4 text-emerald-600"></i>
+                            <h3 class="font-bold text-sm text-slate-700">Água e Matérias-Primas</h3>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="inst_agua" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Potabilidade da Água.</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="inst_materiaprima" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Seleção das Matérias-Primas.</div>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox" name="inst_ilum" disabled class="custom-checkbox mt-1 w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all">
+                                <div class="text-sm text-slate-600">Iluminação adequada e protegida.</div>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-emerald-900 mb-2 pl-1">Observações Gerais (Ambiente)</label>
+                        <textarea id="envObs" rows="2" disabled class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Relate anomalias..."></textarea>
+                    </div>
+                </div>
+            </form>
+
+        </main>
+
+        <footer class="fixed bottom-0 w-full bg-white border-t border-slate-200 p-4 shadow-xl z-50">
+            <div class="max-w-3xl mx-auto flex gap-3">
+                <button onclick="exportCSV()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl transition-all text-sm flex items-center justify-center gap-2 active:scale-95 shadow-md">
+                    <i data-lucide="sheet" class="w-4 h-4"></i> CSV
+                </button>
+                <button onclick="generatePDF()" class="flex-[1.5] bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-4 rounded-2xl shadow-md transition-all active:scale-95 text-sm flex items-center justify-center gap-2">
+                    <i data-lucide="file-down" class="w-4 h-4"></i> Salvar PDF
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Contentor oculto para montagem do PDF -->
+    <div style="position: absolute; top: 0; left: -9999px;">
+        <div id="pdf-report-grid" class="bg-white" style="font-family: Arial, sans-serif; width: 1100px; padding: 20px;"></div>
+    </div>
+
+    <script>
+        document.getElementById('dateInput').valueAsDate = new Date();
+        lucide.createIcons();
+
+        if ('serviceWorker' in navigator) {
+            if (window.location.protocol.startsWith('http')) {
+                window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
+            }
+        }
+
+        // --- LÓGICA DO RESPONSÁVEL ---
+        function handleResponsibleChange(value, targetInputId) {
+            const otherInput = document.getElementById(targetInputId);
+            if (value === 'OUTRO') {
+                otherInput.classList.remove('hidden');
+                otherInput.focus();
+            } else {
+                otherInput.classList.add('hidden');
+                otherInput.value = ''; 
+            }
+        }
+
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+            return weekNo;
+        }
+
+        function switchTab(tab) {
+            const btnEmp = document.getElementById('tab-employees');
+            const btnMac = document.getElementById('tab-machines');
+            const btnEnv = document.getElementById('tab-environment');
+            const formEmp = document.getElementById('form-employees');
+            const formMac = document.getElementById('form-machines');
+            const formEnv = document.getElementById('form-environment');
+
+            const activeClass = "flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all bg-emerald-100 text-emerald-800 whitespace-nowrap px-4";
+            const inactiveClass = "flex-1 min-w-[100px] py-2.5 text-xs font-bold rounded-xl transition-all text-slate-500 hover:bg-slate-50 whitespace-nowrap px-4";
+
+            btnEmp.className = (tab === 'employees') ? activeClass : inactiveClass;
+            btnMac.className = (tab === 'machines') ? activeClass : inactiveClass;
+            btnEnv.className = (tab === 'environment') ? activeClass : inactiveClass;
+
+            formEmp.classList.toggle('hidden', tab !== 'employees');
+            formMac.classList.toggle('hidden', tab !== 'machines');
+            formEnv.classList.toggle('hidden', tab !== 'environment');
+        }
+
+        function toggleSection(section) {
+            const toggle = document.getElementById(`toggle_${section}`);
+            const content = document.getElementById(`content_${section}`);
+            const isActive = toggle.checked;
+
+            content.classList.toggle('section-disabled', !isActive);
+            const inputs = content.querySelectorAll('input, select, textarea');
+            inputs.forEach(el => el.disabled = !isActive);
+        }
+
+        function getFormData() {
+            const date = document.getElementById('dateInput').value;
+            
+            // Responsável Inspeção
+            const respSelect = document.getElementById('responsibleInput').value;
+            const respOther = document.getElementById('otherResponsibleInput').value;
+            const responsible = (respSelect === 'OUTRO') ? (respOther || 'Não Especificado') : respSelect;
+            
+            // Responsável Packing
+            const packSelect = document.getElementById('packingResponsibleInput').value;
+            const packOther = document.getElementById('otherPackingResponsibleInput').value;
+            const packingResponsible = (packSelect === 'OUTRO') ? (packOther || 'Não Especificado') : packSelect;
+
+            const empActive = document.getElementById('toggle_employees').checked;
+            const macActive = document.getElementById('toggle_machines').checked;
+            const envActive = document.getElementById('toggle_environment').checked;
+
+            const getCheck = (formId, fieldName, active) => {
+                if (!active) return false;
+                const form = document.getElementById(formId);
+                const input = form.querySelector(`input[name="${fieldName}"]`);
+                return input ? input.checked : false;
+            };
+
+            const checks = {
+                'Unhas Curtas/Limpas': getCheck('form-employees', 'unhas', empActive),
+                'Barba/Bigode Feitos': getCheck('form-employees', 'barba', empActive),
+                'Cabelos Aparados/Touca': getCheck('form-employees', 'cabelos', empActive),
+                'Ausência de Adornos': getCheck('form-employees', 'adornos', empActive),
+                'Sem Perfume/Maquilhagem': getCheck('form-employees', 'perfume', empActive),
+                'Uniforme Completo': getCheck('form-employees', 'uniforme', empActive),
+                'Botas Limpas': getCheck('form-employees', 'botas', empActive),
+                'EPIs Corretos': getCheck('form-employees', 'epi', empActive),
+                'Máq. Limpeza': getCheck('form-machines', 'mq_limpeza', macActive),
+                'Máq. Vazamento': getCheck('form-machines', 'mq_vazamento', macActive),
+                'Manut. Calibração': getCheck('form-machines', 'mq_calibracao', macActive),
+                'Higiene Instalações': getCheck('form-environment', 'inst_higiene', envActive),
+                'Manejo Resíduos': getCheck('form-environment', 'inst_residuos', envActive),
+                'Controle Pragas': getCheck('form-environment', 'inst_pragas', envActive),
+                'Potabilidade Água': getCheck('form-environment', 'inst_agua', envActive),
+                'Seleção Matéria-Prima': getCheck('form-environment', 'inst_materiaprima', envActive),
+                'Iluminação Ambiente': getCheck('form-environment', 'inst_ilum', envActive)
+            };
+
+            const observations = {
+                emp: empActive ? document.getElementById('empObs').value : '',
+                mac: macActive ? document.getElementById('machineObs').value : '',
+                env: envActive ? document.getElementById('envObs').value : ''
+            };
+
+            return { date, responsible, packingResponsible, checks, observations, sections: { empActive, macActive, envActive } };
+        }
+
+        // --- CORREÇÃO: ADICIONADAS AS OBSERVAÇÕES NA EXPORTAÇÃO CSV ---
+        function exportCSV() {
+            const data = getFormData();
+            if(!data.date) { alert('Selecione a data!'); return; }
+            
+            let csvContent = "\uFEFFData;Resp. Inspeção;Resp. Packing;Item;Status;Detalhes\n"; 
+            
+            // Adiciona itens de verificação
+            for (const [key, val] of Object.entries(data.checks)) {
+                csvContent += `${data.date};${data.responsible};${data.packingResponsible};${key};${val ? 'CONFORME' : 'NÃO CONFORME'};\n`; 
+            }
+            
+            // Adiciona observações como linhas informativas
+            if (data.observations.emp) {
+                csvContent += `${data.date};${data.responsible};${data.packingResponsible};Obs. Colaboradores;INFO;${data.observations.emp.replace(/[\n\r]+/g, ' ')}\n`;
+            }
+            if (data.observations.mac) {
+                csvContent += `${data.date};${data.responsible};${data.packingResponsible};Obs. Máquinas;INFO;${data.observations.mac.replace(/[\n\r]+/g, ' ')}\n`;
+            }
+            if (data.observations.env) {
+                csvContent += `${data.date};${data.responsible};${data.packingResponsible};Obs. Ambiente;INFO;${data.observations.env.replace(/[\n\r]+/g, ' ')}\n`;
+            }
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Checklist_SPG_${data.date}.csv`;
+            link.click();
+        }
+
+        async function generatePDF() {
+            const data = getFormData();
+            if(data.responsible === 'Não Especificado' || data.packingResponsible === 'Não Especificado' || data.packingResponsible === 'SELECIONAR RESPONSÁVEL') {
+                alert("Por favor, preencha corretamente os nomes dos responsáveis.");
+                return;
+            }
+
+            const btn = document.querySelector('button[onclick="generatePDF()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Gerando...`;
+            lucide.createIcons();
+
+            const now = new Date();
+            const datePt = data.date.split('-').reverse().join('/');
+            const timeStr = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            const weekNo = getWeekNumber(now);
+            const dayName = now.toLocaleDateString('pt-PT', { weekday: 'long' });
+            const weekStr = `Semana ${weekNo} (${dayName})`;
+
+            const pdfContainer = document.getElementById('pdf-report-grid');
+
+            const generateItemHtml = (label, isChecked) => {
+                const statusText = isChecked ? 'OK' : 'NC';
+                const statusClass = isChecked ? 'status-ok' : 'status-nc';
+                return `<div class="pdf-item-row"><span style="flex:1;">${label}</span><div style="display:flex; align-items:center;"><span style="margin-left:5px; font-size:9px;" class="${statusClass}">${statusText}</span></div></div>`;
+            };
+
+            let blocksHtml = '';
+
+            if (data.sections.empActive) {
+                let itemsHtml = '';
+                ['Unhas Curtas/Limpas', 'Barba/Bigode Feitos', 'Cabelos Aparados/Touca', 'Ausência de Adornos', 'Sem Perfume/Maquilhagem', 'Uniforme Completo', 'Botas Limpas', 'EPIs Corretos'].forEach(k => itemsHtml += generateItemHtml(k, data.checks[k]));
+                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Colaboradores & EPI</div><div class="pdf-card-body">${itemsHtml}</div></div>`;
+            }
+
+            if (data.sections.macActive) {
+                let itemsHtml = '';
+                ['Máq. Limpeza', 'Máq. Vazamento', 'Manut. Calibração'].forEach(k => itemsHtml += generateItemHtml(k, data.checks[k]));
+                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Máquinas</div><div class="pdf-card-body">${itemsHtml}</div></div>`;
+            }
+
+            if (data.sections.envActive) {
+                let itemsHigieneHtml = '';
+                ['Higiene Instalações', 'Manejo Resíduos', 'Controle Pragas'].forEach(k => itemsHigieneHtml += generateItemHtml(k, data.checks[k]));
+                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Ambiente: Higiene</div><div class="pdf-card-body">${itemsHigieneHtml}</div></div>`;
+
+                let itemsProcessoHtml = '';
+                ['Potabilidade Água', 'Seleção Matéria-Prima', 'Iluminação Ambiente'].forEach(k => itemsProcessoHtml += generateItemHtml(k, data.checks[k]));
+                blocksHtml += `<div class="pdf-card"><div class="pdf-card-header">Ambiente: Processos</div><div class="pdf-card-body">${itemsProcessoHtml}</div></div>`;
+            }
+
+            let obsContent = '';
+            if (data.observations.emp) obsContent += `<div><strong>Colab:</strong> ${data.observations.emp}</div>`;
+            if (data.observations.mac) obsContent += `<div style="margin-top:4px;"><strong>Máq:</strong> ${data.observations.mac}</div>`;
+            if (data.observations.env) obsContent += `<div style="margin-top:4px;"><strong>Amb:</strong> ${data.observations.env}</div>`;
+            if (!obsContent) obsContent = '<div style="font-style:italic; color:#999;">Sem observações registadas.</div>';
+
+            blocksHtml += `
+                <div class="pdf-card">
+                    <div class="pdf-card-header">Observações e Assinaturas</div>
+                    <div class="pdf-card-body">${obsContent}</div>
+                    <div style="margin-top:auto; padding:12px; border-top:1px dashed #ccc; display:flex; gap:20px; justify-content:space-around;">
+                        
+                        <div style="flex:1; text-align:center;">
+                            <div style="height:20px;"></div>
+                            <div style="border-top:1.5px solid #059669; padding-top:6px;">
+                                <div style="font-size:7px; color:#059669; font-weight:bold; text-transform:uppercase; margin-bottom:2px;">Responsável Inspeção</div>
+                                <div style="font-size:9px; font-weight:bold; color:#000;">${data.responsible}</div>
+                            </div>
+                        </div>
+
+                        <div style="flex:1; text-align:center;">
+                            <div style="height:20px;"></div>
+                            <div style="border-top:1.5px solid #059669; padding-top:6px;">
+                                <div style="font-size:7px; color:#059669; font-weight:bold; text-transform:uppercase; margin-bottom:2px;">Responsável Packing</div>
+                                <div style="font-size:9px; font-weight:bold; color:#000;">${data.packingResponsible}</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+
+            pdfContainer.innerHTML = `
+                <div style="width: 100%; border-bottom: 2px solid #059669; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 style="font-size: 24px; font-weight: bold; color: #059669; text-transform: uppercase; margin: 0;">Relatório de Conformidade</h1>
+                        <div style="font-size: 14px; color: #333;">SPG Packing</div>
+                    </div>
+                    <div style="text-align: right; display: flex; align-items: center; gap: 20px;">
+                        <div style="text-align: right;">
+                            <div style="font-size: 16px; font-weight: bold;">${datePt}</div>
+                            <div style="font-size: 12px; font-weight: bold; color: #333;">${timeStr} | ${weekStr}</div>
+                            <div style="font-size: 10px; color: #666; text-transform: uppercase;">Data / Hora / Período</div>
+                        </div>
+                        <img src="https://i.imgur.com/LVOeVk9.png" style="height: 60px;" crossorigin="anonymous">
+                    </div>
+                </div>
+                <div id="pdf-grid-container">${blocksHtml}</div>
+                <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; font-size: 10px; color: #999;">
+                    Documento Gerado Eletronicamente - SPG Sede
+                </div>
+            `;
+
+            try {
+                await new Promise(r => setTimeout(r, 500));
+                const canvas = await html2canvas(pdfContainer, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                
+                const pdf = new jsPDF({ 
+                    orientation: 'landscape', 
+                    unit: 'mm', 
+                    format: [297, Math.max(210, (canvas.height * 277) / canvas.width + 20)] 
+                });
+                
+                pdf.addImage(imgData, 'PNG', 10, 10, 277, (canvas.height * 277) / canvas.width);
+                pdf.save(`Checklist_SPG_${data.date}.pdf`);
+            } catch (err) {
+                console.error(err);
+                alert("Erro ao gerar PDF.");
+            } finally {
+                btn.innerHTML = originalText;
+                lucide.createIcons();
+            }
+        }
+        
+        window.generatePDF = generatePDF;
+    </script>
+</body>
+</html>
